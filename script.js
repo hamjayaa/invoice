@@ -1,7 +1,7 @@
 // --- DATABASE PRODUK (DIPERBARUI) ---
 const products = [
     { id: 'custom', name: '--- Produk/Layanan Kustom ---', price: 0 },
-    { id: 'serum-sehat-ayu', name: 'Serum Sehat Ayu', price: 10000 },
+    { id: 'serum-sehat-ayu', name: 'Serum Sehat Ayu', price: 100000 },
     { id: 'facial-wash-sehat-ayu', name: 'Facial Wash Sehat Ayu', price: 60000 },
     { id: 'day-cream-sehat-ayu', name: 'Day Cream Sehat Ayu', price: 95000 },
     { id: 'night-cream-sehat-ayu', name: 'Night Cream Sehat Ayu', price: 95000 },
