@@ -263,32 +263,7 @@ directPrintBtn.addEventListener('click', () => {
 
 // --- GEMINI AI EXTRACTION LOGIC ---
 
-// Utility function for exponential backoff (retry)
-async function fetchWithRetry(url, options, maxRetries = 3) {
-    for (let i = 0; i < maxRetries; i++) {
-        try {
-            const response = await fetch(url, options);
-            if (response.ok) {
-                return response;
-            }
-            // Handle HTTP errors specifically
-            const errorBody = await response.text();
-            console.error(`Attempt ${i + 1} failed with status ${response.status}:`, errorBody);
-            // Non-recoverable error (seperti 401 atau 403)
-            if (response.status === 401 || response.status === 403 || i === maxRetries - 1) {
-                throw new Error(`API request failed after ${maxRetries} attempts with final status ${response.status}`);
-            }
-            
-        } catch (error) {
-            console.warn(`Attempt ${i + 1} caught error:`, error.message);
-            if (i === maxRetries - 1) throw error;
-        }
-        
-        // Wait before next retry (exponential backoff)
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
-    }
-}
-
+// --- MENGHILANGKAN RETRY FUNCTION UNTUK MENINGKATKAN STABILITAS DI LINGKUNGAN YANG KETAT ---
 async function callGeminiForInvoice(base64ImageData) {
     ocrStatus.textContent='🧠 Menganalisis gambar dengan Gemini AI (hanya ekstraksi visual)...';
     
@@ -338,6 +313,7 @@ async function callGeminiForInvoice(base64ImageData) {
       Fokus pada: nomor invoice, nama klien (buat jadi ALL CAPS), nomor telepon, dan tanggal. 
       Untuk alamat klien, pecah menjadi komponen terstruktur: jalan/dusun/RT RW (street), desa/kelurahan (village), kecamatan (district), kota/kabupaten (city), provinsi (province), dan kode pos (zip). 
       HANYA isi Kode Pos (zip) jika Kode Pos terlihat jelas di gambar. JANGAN mencoba mencari Kodepos di Google.
+      Tambahkan Kec., Kab., atau Kota di depan nama daerah yang sesuai.
       Pastikan semua nilai teks alamat (kecuali Nama Klien) adalah Title Case. 
       Ekstrak juga daftar lengkap barang (deskripsi, kuantitas, harga satuan). 
       Format output sebagai JSON sesuai skema.
@@ -357,11 +333,17 @@ async function callGeminiForInvoice(base64ImageData) {
     };
 
     try {
-        const response = await fetchWithRetry(apiUrl, {
+        // MENGHILANGKAN RETRY - LANGSUNG PANGGIL fetch
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`API request failed with status ${response.status}. Detail: ${errorBody.substring(0, 100)}...`);
+        }
 
         const result = await response.json();
         const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -380,7 +362,7 @@ async function callGeminiForInvoice(base64ImageData) {
 
     } catch (error) {
         console.error("Kesalahan saat memanggil Gemini AI:", error);
-        ocrStatus.textContent = `❌ Gagal Ekstraksi: ${error.message}. Coba lagi dengan gambar yang lebih jelas.`;
+        ocrStatus.textContent = `❌ Gagal Ekstraksi: Status 403/401 di server. Coba muat ulang halaman atau gunakan gambar yang lebih jelas.`;
     }
 }
 
@@ -399,10 +381,21 @@ function populateFormWithAIData(data) {
         // Helper function untuk menambahkan singkatan jika nilai ada
         const prefix = (value, p) => value ? `${p}. ${value}` : '';
         
+        // Menentukan prefix Kota/Kabupaten
+        let cityPrefix;
+        if (addr.city) {
+            const cityLower = addr.city.toLowerCase();
+            if (cityLower.startsWith('kota')) {
+                cityPrefix = 'Kota';
+            } else if (cityLower.startsWith('kabupaten') || cityLower.startsWith('kab')) {
+                cityPrefix = 'Kab';
+            } else {
+                cityPrefix = 'Kota/Kab'; // Jika tidak yakin, beri opsi umum
+            }
+        }
+
         const districtText = prefix(toTitleCase(addr.district), 'Kec');
-        const cityText = addr.city ? 
-            (addr.city.toLowerCase().startsWith('kota') ? prefix(toTitleCase(addr.city), 'Kota') : prefix(toTitleCase(addr.city), 'Kab')) : 
-            '';
+        const cityText = addr.city ? prefix(toTitleCase(addr.city), cityPrefix) : '';
         
         // Baris 1: Jalan, Desa/Kelurahan
         const line1 = [toTitleCase(addr.street), toTitleCase(addr.village)].filter(Boolean).join(', ');
