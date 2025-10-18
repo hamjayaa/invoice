@@ -1,0 +1,108 @@
+:root{
+  --accent:#3C584C;
+  --muted:#6b7280;
+  --paper-bg:#fff;
+}
+body{font-family:Inter, "Segoe UI", Roboto, Arial; background:#f3f4f6; margin:0; padding:20px; color:#111}
+.app{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 440px;gap:20px}
+.card{background:var(--paper-bg);padding:18px;border-radius:12px;box-shadow:0 6px 20px rgba(12,13,14,0.06)}
+h1{margin:0 0 12px;font-size:20px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+input[type="text"], input[type="date"], input[type="number"], textarea, select{width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;box-sizing:border-box}
+.row{display:flex;gap:12px; align-items:center;}
+.row.col{flex-direction:column}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button{background:var(--accent);color:#fff;border:none;padding:10px 12px;border-radius:10px;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(60, 88, 76, 0.2)}
+.small{font-size:13px;padding:8px 10px}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th, td{padding:8px;border-bottom:1px solid #eef2f7;text-align:left;font-size:14px}
+th{background:#fafafa}
+.right{text-align:right}
+.muted{color:var(--muted);font-size:13px}
+.hint{font-size:12px;color:var(--muted)}
+.preview-wrap{overflow:auto;height:80vh;padding:12px}
+
+/* Print area container (Flex Column) */
+.print-area{
+  width:210mm;
+  min-height:297mm; /* Min height for A4 */
+  padding:10mm;
+  background:#fff;
+  margin:0 auto;
+  box-sizing:border-box;
+  display: flex;
+  flex-direction: column;
+  font-size: 12.5px; /* FONT UTAMA INVOICE */
+}
+
+/* Kunci konten utama untuk mengambil sisa ruang agar footer terdorong ke bawah */
+.invoice-main-content {
+  flex-grow: 1; 
+  /* Membantu mencegah pemisahan konten penting di antara halaman (print only) */
+  page-break-after: avoid; 
+  padding-bottom: 20mm; /* Reserve space for the footer content */
+}
+
+.inv-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:48px;height:48px;object-fit:contain;border-radius:8px;border:1px solid #eee}
+.brand .logo-text{font-weight:800;font-size:18px;color:var(--accent)}
+.inv-meta{text-align:right}
+
+.footer { 
+  font-size: 12px; 
+  margin-top: auto; /* KUNCI: Mendorong ke bawah di Flex container */
+} 
+
+@media (max-width:980px){ .app{grid-template-columns:1fr;} .preview-wrap{height:auto} }
+
+/* ATURAN CETAK */
+@media print {
+  html, body {
+    height: 100%; /* Penting: Memastikan elemen induk memiliki tinggi penuh */
+  }
+  body {
+    background: #fff;
+    padding: 0;
+    margin: 0;
+  }
+  .no-print { display: none !important; }
+  .app {
+     display: block; 
+     box-shadow: none;
+     max-width: 100%;
+     margin: 0;
+     padding: 0;
+  }
+  .app > .card:first-child { 
+    display: none !important;
+  }
+  .app > .card:last-child { 
+    display: block !important;
+    box-shadow: none;
+    padding: 0;
+    border: none;
+  }
+  .preview-wrap {
+    overflow: visible;
+    height: auto;
+    padding: 0;
+  }
+  .print-area {
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    /* Memastikan tinggi penuh (A4 dikurangi margin @page) */
+    min-height: 277mm; 
+    height: 277mm; 
+    border: none;
+    /* Revert box-sizing for print consistency */
+    box-sizing: content-box; 
+  }
+  @page {
+    size: A4 portrait;
+    margin: 10mm; /* Margin cetak konsisten */
+  }
+}

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Invoice Printer - Mumtas (dengan Gemini AI)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <!-- LEFT: form -->
+  <div class="card no-print">
+    <h1>Buat Invoice — Isi data</h1>
+
+    <!-- Brand / Logo + alamat perusahaan -->
+    <div class="form-grid" style="align-items:end">
+      <div>
+        <label>Logo (URL)</label>
+        <input id="logo_url" type="text" placeholder="https://.../logo.png">
+        <div class="hint" style="margin-top:6px">Atau upload file: PNG/JPG</div>
+        <input id="logo_file" type="file" accept="image/*">
+      </div>
+      <div>
+        <label>Nama Perusahaan (dari)</label>
+        <input id="from_name" type="text" value="PT MUMTAZ HALALANTHOYYIBAN SEJAHTERA">
+      </div>
+       <div style="grid-column:1/3">
+        <label>Alamat Perusahaan</label>
+        <textarea id="from_addr" rows="3">Jl. Raya Wiyoro No.19, Baturetno
+Kec. Banguntapan, Kab. Bantul
+D.I. Yogyakarta 55197</textarea>
+      </div>
+      <div>
+        <label>No. HP Perusahaan</label>
+        <input id="from_hp" type="text" value="0822-6118-6703">
+      </div>
+      <div>
+        <label>Website Perusahaan</label>
+        <input id="from_web" type="text" value="www.mumtas.net">
+      </div>
+    </div>
+
+    <!-- Data penerima & invoice -->
+    <div class="form-grid" style="margin-top:12px">
+      <div>
+        <label>Nama Client (ke)</label>
+        <input id="to_name" type="text" value="Bapak/Ibu Contoh">
+      </div>
+      <div>
+        <label>Invoice No.</label>
+        <input id="inv_no" type="text" value="INV-2025-001">
+      </div>
+      <div style="grid-column: 1 / 3;">
+        <label>Alamat Client</label>
+        <textarea id="to_addr" rows="3">Jl. Pelanggan No. 99, Kelurahan Contoh
+Kec. Contoh, Kota Bandung
+Jawa Barat 40123</textarea>
+      </div>
+      <div>
+        <label>No. HP Client</label>
+        <input id="to_hp" type="text" value="+62 898-7654-3210">
+      </div>
+      <div>
+        <label>Tanggal</label>
+        <input id="inv_date" type="date" value="">
+      </div>
+    </div>
+
+    <hr style="margin:12px 0;border:none;border-top:1px solid #eee" />
+
+    <h1 style="font-size:16px;margin-bottom:8px">Daftar Item</h1>
+    <div id="items-area">
+      <table id="items-table">
+        <thead>
+          <tr><th style="width:40%">Deskripsi</th><th style="width:12%">Qty</th><th style="width:20%">Harga satuan</th><th style="width:18%">Total</th><th style="width:10%" class="no-print"></th></tr>
+        </thead>
+        <tbody id="items-body"></tbody>
+      </table>
+    </div>
+
+    <div class="actions">
+      <button id="add-row">+ Tambah item</button>
+      <button id="clear-rows" class="ghost">Clear all</button>
+      <button id="fill-sample" class="ghost">Isi contoh</button>
+    </div>
+
+    <div class="row" style="gap:8px;margin-top:12px">
+      <div style="flex:1">
+        <label>Diskon (Rp)</label>
+        <input id="discount" type="number" min="0" value="0">
+      </div>
+      <div style="width:140px">
+        <label>Pajak %</label>
+        <input id="taxrate" type="number" min="0" max="100" value="11">
+      </div>
+      <div style="width:140px">
+        <label>Mata Uang</label>
+        <select id="currency"><option value="IDR">IDR</option><option value="USD">USD</option></select>
+      </div>
+    </div>
+
+    <div class="actions no-print">
+      <button id="update-preview" class="small">Update Preview</button>
+      <button id="direct-print" class="small">Cetak / Simpan PDF</button>
+    </div>
+
+    <!-- Gemini AI Extractor -->
+    <div class="card" style="margin-top:14px;background:#f9fafb;border:1px dashed #e5e7eb">
+      <h1 style="font-size:16px">Isi otomatis dari screenshot (Gemini AI)</h1>
+      <p class="hint">Upload screenshot orderan (resi/chat/checkout). Gemini AI akan mengekstrak detailnya secara otomatis. Kode Pos harus tertera di gambar jika ingin terisi.</p>
+      <div class="row">
+        <input id="ocr_file" type="file" accept="image/*" style="flex:1">
+        <button id="ocr_extract" class="small">Ekstrak dari Gambar</button>
+      </div>
+      <div id="ocr_status" class="hint" style="margin-top:8px"></div>
+    </div>
+
+    <p style="margin-top:12px" class="muted">Gunakan tombol <b>Cetak / Simpan PDF</b> untuk hasil teks tertajam.</p>
+  </div>
+
+  <!-- RIGHT: preview -->
+  <div class="card">
+    <h1 class="no-print">Preview</h1>
+    <div class="preview-wrap" id="preview-wrap"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
